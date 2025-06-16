@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Component TinyMCE Editor</title>
+    <script src="https://cdn.tiny.cloud/1/t40niwwezuit8h68ujh6vgy2asom76u3gs1k2ohc3be3fuqo/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+</head>
+<body>
+<div class="editor-wrapper">
+    <div class="toolbar">
+        <button id="insert-template">Insert</button>
+    </div>
+    <textarea id="editor"></textarea>
+</div>
+<div class="templates-panel">
+    <h3>Templates</h3>
+    <ul id="templateList" class="templates-list"></ul>
+    <div>
+        <button id="addTemplate">+</button>
+        <button id="removeTemplate">-</button>
+    </div>
+    <div class="edit-template">
+        <label>Edit template:</label>
+        <input type="text" id="editTemplate" />
+    </div>
+</div>
+<script type="module" src="./index.js"></script>
+</body>
+</html>
