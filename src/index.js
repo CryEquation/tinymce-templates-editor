@@ -1,7 +1,11 @@
 import './style.css';
 import './components/template-dropdown.js';
 
-let templates = ['template 1', 'template 2', 'template 3'];
+let templates = [
+  { name: 'template 1', content: '' },
+  { name: 'template 2', content: '' },
+  { name: 'template 3', content: '' }
+];
 let selectedTemplateIndex = 0;
 let editorInstance = null;
 
@@ -12,15 +16,13 @@ function renderTemplateList() {
   templateList.innerHTML = '';
   templates.forEach((t, i) => {
     const li = document.createElement('li');
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = t;
-    li.textContent = tempDiv.textContent;
+    li.textContent = t.name;
     if (i === selectedTemplateIndex) li.classList.add('selected');
     li.addEventListener('click', () => {
       selectedTemplateIndex = i;
-      editTemplate.value = templates[i];
+      editTemplate.value = templates[i].name;
       if (editorInstance) {
-        editorInstance.setContent(templates[i]);
+        editorInstance.setContent(templates[i].content);
       }
       renderTemplateList();
     });
@@ -28,27 +30,27 @@ function renderTemplateList() {
   });
 }
 
-function updateTemplate(newText) {
-  templates[selectedTemplateIndex] = newText;
+function updateTemplate(newName) {
+  templates[selectedTemplateIndex].name = newName;
   renderTemplateList();
-  document.querySelectorAll('template-dropdown').forEach(el => el.setTemplates(templates));
+  document.querySelectorAll('template-dropdown').forEach(el => el.setTemplates(templates.map(t => t.name)));
 }
 
 document.getElementById('addTemplate').onclick = () => {
-  templates.push('template');
+  templates.push({ name: 'template', content: '' });
   selectedTemplateIndex = templates.length - 1;
   renderTemplateList();
   editTemplate.value = 'template';
-  document.querySelectorAll('template-dropdown').forEach(el => el.setTemplates(templates));
+  document.querySelectorAll('template-dropdown').forEach(el => el.setTemplates(templates.map(t => t.name)));
 };
 
 document.getElementById('removeTemplate').onclick = () => {
   if (templates.length > 0) {
-    const removed = templates.splice(selectedTemplateIndex, 1)[0];
+    templates.splice(selectedTemplateIndex, 1);
     selectedTemplateIndex = Math.max(0, selectedTemplateIndex - 1);
     renderTemplateList();
-    editTemplate.value = templates[selectedTemplateIndex] || '';
-    document.querySelectorAll('template-dropdown').forEach(el => el.setTemplates(templates));
+    editTemplate.value = templates[selectedTemplateIndex]?.name || '';
+    document.querySelectorAll('template-dropdown').forEach(el => el.setTemplates(templates.map(t => t.name)));
   }
 };
 
@@ -69,29 +71,26 @@ tinymce.init({
   setup: editor => {
     editorInstance = editor;
     
+    const saveContent = () => {
+      const content = editor.getContent();
+      templates[selectedTemplateIndex].content = content;
+      renderTemplateList();
+    };
+    
     editor.on('keydown', (e) => {
       if (e.key === 'Insert') {
-        const content = editor.getContent();
-        templates[selectedTemplateIndex] = content;
-        editTemplate.value = content;
-        renderTemplateList();
+        saveContent();
         e.preventDefault();
       }
     });
 
-    editor.on('change', () => {
-      if (selectedTemplateIndex >= 0) {
-        templates[selectedTemplateIndex] = editor.getContent();
-        editTemplate.value = editor.getContent();
-      }
-    });
-
     document.getElementById('insert-template').onclick = () => {
-      const html = `<template-dropdown data-values='${JSON.stringify(templates)}'></template-dropdown>`;
+      saveContent();
+      const html = `<template-dropdown data-values='${JSON.stringify(templates.map(t => t.name))}'></template-dropdown>`;
       editor.insertContent(html);
     };
   }
 });
 
 renderTemplateList();
-editTemplate.value = templates[selectedTemplateIndex];
+editTemplate.value = templates[selectedTemplateIndex].name;
